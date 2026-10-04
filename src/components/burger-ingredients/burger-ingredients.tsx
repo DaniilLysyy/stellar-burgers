@@ -4,13 +4,16 @@ import { useInView } from 'react-intersection-observer';
 
 import type { TIngredient, TTabMode } from '@utils-types';
 
+import { useSelector } from '../../services/store';
+import { selectIngredients } from '../../services/ingredientsSlice';
+
 export const BurgerIngredients = (): React.JSX.Element => {
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
   const titleBunRef = useRef<HTMLHeadingElement>(null);
   const titleMainRef = useRef<HTMLHeadingElement>(null);
   const titleSaucesRef = useRef<HTMLHeadingElement>(null);
-  // TODO: Взять ингредиенты из стора
-  const ingredients: TIngredient[] = [];
+  
+  const ingredients = useSelector(selectIngredients);
 
   const [bunsRef, inViewBuns] = useInView({
     threshold: 0,
