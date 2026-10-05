@@ -25,9 +25,11 @@ import {
   useLocation,
   useNavigate
 } from 'react-router-dom';
+import type { Location } from 'react-router-dom';
 
 import { fetchIngredients } from '../../services/ingredientsSlice';
 import {
+  getUser,
   selectIsAuthChecked,
   selectUser
 } from '../../services/userSlice';
@@ -37,13 +39,18 @@ import {
   useSelector
 } from '../../services/store';
 
-import { getUser } from '../../services/userSlice';
-
 import '../../index.css';
 import styles from './app.module.css';
 
 const App = (): React.JSX.Element => {
   const dispatch = useDispatch();
+  const location = useLocation();
+
+  const locationState = location.state as {
+    background?: Location;
+  } | null;
+
+  const background = locationState?.background;
 
   useEffect(() => {
     dispatch(fetchIngredients());
@@ -53,13 +60,22 @@ const App = (): React.JSX.Element => {
   return (
     <div className={styles.app}>
       <AppHeader />
-
-      <Routes>
+      <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
 
         <Route path='/feed' element={<Feed />} />
 
-       <Route
+        <Route
+          path='/ingredients/:id'
+          element={<IngredientDetails />}
+        />
+
+        <Route
+          path='/feed/:number'
+          element={<OrderInfo />}
+        />
+
+        <Route
           path='/login'
           element={
             <ProtectedRoute onlyUnAuth>
@@ -114,36 +130,49 @@ const App = (): React.JSX.Element => {
         />
 
         <Route
-          path='/feed/:number'
-          element={
-            <ModalRoute title='Информация о заказе'>
-              <OrderInfo />
-            </ModalRoute>
-          }
-        />
-
-        <Route
-          path='/ingredients/:id'
-          element={
-            <ModalRoute title='Детали ингредиента'>
-              <IngredientDetails />
-            </ModalRoute>
-          }
-        />
-
-        <Route
           path='/profile/orders/:number'
           element={
             <ProtectedRoute>
-              <ModalRoute title='Информация о заказе'>
-                <OrderInfo />
-              </ModalRoute>
+              <OrderInfo />
             </ProtectedRoute>
           }
         />
 
         <Route path='*' element={<NotFound404 />} />
       </Routes>
+
+      {background && (
+        <Routes>
+          <Route
+            path='/ingredients/:id'
+            element={
+              <ModalRoute title='Детали ингредиента'>
+                <IngredientDetails />
+              </ModalRoute>
+            }
+          />
+
+          <Route
+            path='/feed/:number'
+            element={
+              <ModalRoute title='Информация о заказе'>
+                <OrderInfo />
+              </ModalRoute>
+            }
+          />
+
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <ModalRoute title='Информация о заказе'>
+                  <OrderInfo />
+                </ModalRoute>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      )}
     </div>
   );
 };
@@ -181,7 +210,6 @@ const ProtectedRoute = ({
 
   return children;
 };
-
 
 const ModalRoute = ({
   title,

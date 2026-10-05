@@ -1,25 +1,57 @@
 import { Preloader, OrderInfoUI } from '@ui';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import type { TIngredient } from '@utils-types';
 
-import { useSelector } from '../../services/store';
-import { selectIngredients } from '../../services/ingredientsSlice';
-import { selectFeedOrders } from '../../services/feedSlice';
+import {
+  useDispatch,
+  useSelector
+} from '../../services/store';
+
+import {
+  selectIngredients
+} from '../../services/ingredientsSlice';
+
+import {
+  fetchOrderByNumber,
+  selectCurrentOrder,
+  selectFeedOrders
+} from '../../services/feedSlice';
+
+import {
+  selectProfileOrders
+} from '../../services/profileOrdersSlice';
 
 export const OrderInfo = (): React.JSX.Element => {
   const { number } = useParams<{ number: string }>();
 
+  const dispatch = useDispatch();
+
   const orders = useSelector(selectFeedOrders);
+  const profileOrders = useSelector(selectProfileOrders);
+  const currentOrder = useSelector(selectCurrentOrder);
   const ingredients = useSelector(selectIngredients);
 
-  const orderData = orders.find(
-    (order) => order.number === Number(number)
-  );
+  const orderNumber = Number(number);
+
+  const orderData =
+    orders.find((order) => order.number === orderNumber) ??
+    profileOrders.find((order) => order.number === orderNumber) ??
+    (currentOrder?.number === orderNumber
+      ? currentOrder
+      : undefined);
+
+  useEffect(() => {
+    if (!orderData && Number.isFinite(orderNumber)) {
+      dispatch(fetchOrderByNumber(orderNumber));
+    }
+  }, [dispatch, orderData, orderNumber]);
 
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
+    if (!orderData || !ingredients.length) {
+      return null;
+    }
 
     const date = new Date(orderData.createdAt);
 
