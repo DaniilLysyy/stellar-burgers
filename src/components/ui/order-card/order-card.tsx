@@ -4,7 +4,7 @@ import {
   FormattedDate,
 } from '@krgaa/react-developer-burger-ui-components';
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import type { OrderCardUIProps } from './type';
 
@@ -13,8 +13,9 @@ import styles from './order-card.module.css';
 export const OrderCardUI = memo(function OrderCardUI({
   orderInfo,
   maxIngredients,
-  locationState,
+  locationState
 }: OrderCardUIProps): React.JSX.Element {
+  const location = useLocation();
   return (
     <Link
       to={orderInfo.number.toString()}
