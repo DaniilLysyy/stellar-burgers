@@ -3,31 +3,55 @@ import { memo } from 'react';
 
 import type { BurgerConstructorElementProps } from './type';
 
-export const BurgerConstructorElement = memo(function BurgerConstructorElement({
-  ingredient,
-  index,
-  totalItems,
-}: BurgerConstructorElementProps): React.JSX.Element {
-  const handleMoveDown = (): void => {
-    // TODO
-  };
+import { useDispatch } from '../../services/store';
+import {
+  moveIngredient,
+  removeIngredient
+} from '../../services/constructorSlice';
 
-  const handleMoveUp = (): void => {
-    // TODO
-  };
+export const BurgerConstructorElement = memo(
+  function BurgerConstructorElement({
+    ingredient,
+    index,
+    totalItems
+  }: BurgerConstructorElementProps): React.JSX.Element {
+    const dispatch = useDispatch();
 
-  const handleClose = (): void => {
-    // TODO
-  };
+    const handleMoveDown = (): void => {
+      if (index >= totalItems - 1) return;
 
-  return (
-    <BurgerConstructorElementUI
-      ingredient={ingredient}
-      index={index}
-      totalItems={totalItems}
-      handleMoveUp={handleMoveUp}
-      handleMoveDown={handleMoveDown}
-      handleClose={handleClose}
-    />
-  );
-});
+      dispatch(
+        moveIngredient({
+          fromIndex: index,
+          toIndex: index + 1
+        })
+      );
+    };
+
+    const handleMoveUp = (): void => {
+      if (index <= 0) return;
+
+      dispatch(
+        moveIngredient({
+          fromIndex: index,
+          toIndex: index - 1
+        })
+      );
+    };
+
+    const handleClose = (): void => {
+      dispatch(removeIngredient(ingredient.id));
+    };
+
+    return (
+      <BurgerConstructorElementUI
+        ingredient={ingredient}
+        index={index}
+        totalItems={totalItems}
+        handleMoveUp={handleMoveUp}
+        handleMoveDown={handleMoveDown}
+        handleClose={handleClose}
+      />
+    );
+  }
+);
