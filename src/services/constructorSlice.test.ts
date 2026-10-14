@@ -128,7 +128,8 @@ describe('constructorSlice', () => {
     ]);
   });
 
-  test('добавляет несколько ингредиентов в нужном порядке', () => {
+  
+  test('добавляет несколько ингредиентов в нужном порядке с уникальными id', () => {
     const stateAfterMain = constructorReducer(
       initialState,
       addIngredient(mockMain)
@@ -139,10 +140,24 @@ describe('constructorSlice', () => {
       addIngredient(mockSauce)
     );
 
+    const stateAfterSecondMain = constructorReducer(
+      stateAfterSauce,
+      addIngredient(mockMain)
+    );
+
     expect(
-      stateAfterSauce.ingredients.map((ingredient) => ingredient._id)
-    ).toEqual(['main-1', 'sauce-1']);
+      stateAfterSecondMain.ingredients.map((ingredient) => ingredient._id)
+    ).toEqual(['main-1', 'sauce-1', 'main-1']);
+
+    const firstMainId = stateAfterSecondMain.ingredients[0].id;
+    const secondMainId = stateAfterSecondMain.ingredients[2].id;
+
+    expect(firstMainId).toEqual(expect.any(String));
+    expect(secondMainId).toEqual(expect.any(String));
+
+    expect(firstMainId).not.toBe(secondMainId);
   });
+
 
   test('удаляет ингредиент по его уникальному id', () => {
     const state = constructorReducer(

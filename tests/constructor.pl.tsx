@@ -37,24 +37,34 @@ test.describe('Конструктор бургера и оформление з�
     ).toHaveCount(2);
   });
 
-  test('модальное окно ингредиента открывается и закрывается', async ({
+    test('модальное окно ингредиента открывается и закрывается', async ({
     page
   }) => {
     const ingredient = page
       .getByRole('listitem')
-      .filter({ hasText: 'Тестовая булка' });
+      .filter({ hasText: 'Тестовая начинка' });
 
     await ingredient.getByRole('link').click();
 
-    await expect(page).toHaveURL(/\/ingredients\/test-bun-1$/);
+    await expect(page).toHaveURL(/\/ingredients\/test-main-1$/);
 
     const modal = page.getByRole('dialog');
 
     await expect(modal).toBeVisible();
 
     await expect(
-      modal.getByText('Тестовая булка', { exact: true })
+      modal.getByRole('heading', {
+        name: 'Тестовая начинка',
+        exact: true
+      })
     ).toBeVisible();
+
+    await expect(
+      modal.getByRole('heading', {
+        name: 'Тестовая булка',
+        exact: true
+      })
+    ).toHaveCount(0);
 
     await modal.getByRole('button', { name: 'Закрыть' }).click();
 
@@ -76,7 +86,11 @@ test.describe('Конструктор бургера и оформление з�
     await expect(modal).toBeVisible();
     await expect(page).toHaveURL(/\/ingredients\/test-bun-1$/);
 
-    await page.mouse.click(10, 300);
+    const overlay = page.getByTestId('modal-overlay');
+
+    await expect(overlay).toBeVisible();
+
+    await overlay.click({ position: { x: 5, y: 5 } });
 
     await expect(modal).not.toBeVisible();
     await expect(page).toHaveURL('http://localhost:4000/');
